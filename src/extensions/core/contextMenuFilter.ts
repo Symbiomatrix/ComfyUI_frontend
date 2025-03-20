@@ -116,26 +116,30 @@ const ext = {
             }
           })
 
-          filter.addEventListener('input', () => {
-            // Hide all items that don't match our filter
-            const term = filter.value.toLocaleLowerCase()
-            // When filtering, recompute which items are visible for arrow up/down and maintain selection.
-            displayedItems = items.filter((item) => {
-              const isVisible =
-                !term || item.textContent?.toLocaleLowerCase().includes(term)
-              item.style.display = isVisible ? 'block' : 'none'
-              return isVisible
-            })
-
-            selectedIndex = 0
-            if (displayedItems.includes(selectedItem)) {
-              selectedIndex = displayedItems.findIndex(
-                (d) => d === selectedItem
-              )
+          // SBM Filter by regex.
+          filter.addEventListener("input", () => {
+            const term = filter.value.trim();
+            try {
+          	const regex = new RegExp(term, 'i');
+          	displayedItems = items.filter((item) => {
+          	  const isVisible = !term || regex.test(item.textContent || '');
+          	  item.style.display = isVisible ? "block" : "none";
+          	  return isVisible;
+          	});
+            } catch (error) {
+          	const lowerTerm = term.toLocaleLowerCase();
+          	displayedItems = items.filter((item) => {
+          	  const isVisible = !term || item.textContent?.toLocaleLowerCase().includes(lowerTerm);
+          	  item.style.display = isVisible ? "block" : "none";
+          	  return isVisible;
+          	});
             }
-            itemCount = displayedItems.length
-
-            updateSelected()
+            selectedIndex = 0;
+            if (displayedItems.includes(selectedItem)) {
+          	selectedIndex = displayedItems.findIndex((d) => d === selectedItem);
+            }
+            itemCount = displayedItems.length;
+            updateSelected();
 
             // If we have an event then we can try and position the list under the source
             if (options.event) {
